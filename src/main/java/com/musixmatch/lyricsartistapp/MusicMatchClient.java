@@ -22,11 +22,9 @@ public class MusicMatchClient {
 
     public ResponseEntity<Message> getMessage(String artist, String track){
 
-        //String Artist = artist;
-
         String uri = "http://api.musixmatch.com/ws/1.1/track.search?q_artist=" + artist + "&q_track=" + track + "&apikey=" + API_KEY;
 
-        RequestEntity requestEntity = RequestEntity.get(URI.create(uri)).header("ContentType","application/json").build();
+        RequestEntity requestEntity = RequestEntity.get(URI.create(uri)).header("Content-Type","application/json").build();
         return restTemplate.exchange(requestEntity, Message.class);
     }
 }
