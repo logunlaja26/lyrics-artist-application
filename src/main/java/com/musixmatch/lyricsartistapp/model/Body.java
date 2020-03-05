@@ -7,20 +7,20 @@ import java.util.List;
 public class Body {
 
     @JsonProperty("track_list")
-    private List<Track> trackList;
+    private List<TrackList> trackList;
 
     public Body() {
     }
 
-    public Body(List<Track> trackList) {
+    public Body(List<TrackList> trackList) {
         this.trackList = trackList;
     }
 
-    public List<Track> getTrackList() {
+    public List<TrackList> getTrackList() {
         return trackList;
     }
 
-    public void setTrackList(List<Track> trackList) {
+    public void setTrackList(List<TrackList> trackList) {
         this.trackList = trackList;
     }
 

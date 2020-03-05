@@ -5,28 +5,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Track {
 
     @JsonProperty("track_id")
-    private int trackId;
+    private long trackId;
+
+    @JsonProperty("track_name")
+    private String trackName;
 
     public Track() {
     }
 
-    public Track(int trackId) {
+    public Track(long trackId, String trackName) {
         this.trackId = trackId;
+        this.trackName = trackName;
     }
 
-    public int getTrackId() {
+    public long getTrackId() {
         return trackId;
     }
 
-    public void setTrackId(int trackId) {
+    public void setTrackId(long trackId) {
         this.trackId = trackId;
     }
 
-    @Override
-    public String toString() {
-        return "Track{" +
-                "trackId=" + trackId +
-                '}';
+    public String getTrackName() {
+        return trackName;
+    }
+
+    public void setTrackName(String trackName) {
+        this.trackName = trackName;
     }
 
     @Override
@@ -36,11 +41,22 @@ public class Track {
 
         Track track = (Track) o;
 
-        return trackId == track.trackId;
+        if (trackId != track.trackId) return false;
+        return trackName != null ? trackName.equals(track.trackName) : track.trackName == null;
     }
 
     @Override
     public int hashCode() {
-        return trackId;
+        int result = (int) (trackId ^ (trackId >>> 32));
+        result = 31 * result + (trackName != null ? trackName.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Track{" +
+                "trackId=" + trackId +
+                ", trackName='" + trackName + '\'' +
+                '}';
     }
 }
