@@ -17,8 +17,8 @@ public class MusicMatchRestController {
     }
 
     @GetMapping(value = "/lyrics")
-    public Response getTrackId(@RequestParam("artist") String artist,
-                               @RequestParam("track") String track) {
-        return musicMatchClient.getResponse(artist, track).getBody();
+    public Response getLyrics(@RequestParam("artist") String artist,
+                              @RequestParam("track") String track) {
+        return musicMatchClient.getLyrics(artist, track).getBody();
     }
 }
