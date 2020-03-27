@@ -44,25 +44,31 @@ public class MusicMatchClient {
                 .build()
                 .toUri();
 
-        RequestEntity lyricsRequest = RequestEntity.get(lyricsUrl)
-                .header("Content-Type", "text/plain;charset=utf-8")
-                .build();
-
-        ResponseEntity<Response> lyricsResponse = null;
-
-        try {
-            lyricsResponse = restTemplate.exchange(lyricsRequest, Response.class);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new MusicMatchException("Response body could not be parsed.");
-        }
+        ResponseEntity<Response> lyricsResponse = callMusicMatch(lyricsUrl);
 
         log.info(lyricsResponse.getBody().getMessage().getBody().getLyrics().getLyricsBody());
         return lyricsResponse;
     }
 
+    private ResponseEntity<Response> callMusicMatch(URI uri) {
+        RequestEntity request = RequestEntity.get(uri)
+                .header("Content-Type", "text/plain;charset=utf-8")
+                .build();
+
+        ResponseEntity<Response> response;
+
+        try {
+            response = restTemplate.exchange(request, Response.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new MusicMatchException("Response body could not be parsed.");
+        }
+
+        return response;
+    }
+
     private long getTrackId(String artist, String track) {
-        URI url = UriComponentsBuilder
+        URI trackSearchUrl = UriComponentsBuilder
                 .fromHttpUrl(musicMatchUrl)
                 .path("track.search")
                 .queryParam("q_artist", artist)
@@ -71,18 +77,7 @@ public class MusicMatchClient {
                 .build()
                 .toUri();
 
-        RequestEntity requestEntity = RequestEntity.get(url)
-                .header("Content-Type", "text/plain;charset=utf-8")
-                .build();
-
-        ResponseEntity<Response> tracksResponse = null;
-
-        try {
-            tracksResponse = restTemplate.exchange(requestEntity, Response.class);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            throw new MusicMatchException("Response body could not be parsed.");
-        }
+        ResponseEntity<Response> tracksResponse = callMusicMatch(trackSearchUrl);
 
         List<TrackList> trackList = tracksResponse.getBody().getMessage().getBody().getTrackList();
 
