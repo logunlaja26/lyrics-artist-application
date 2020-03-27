@@ -16,8 +16,11 @@ public class Body {
     public Body() {
     }
 
-    public Body(List<TrackList> trackList, Lyric lyrics) {
+    public Body(List<TrackList> trackList) {
         this.trackList = trackList;
+    }
+
+    public Body(Lyric lyrics) {
         this.lyrics = lyrics;
     }
 

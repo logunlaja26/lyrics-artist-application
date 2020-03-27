@@ -1,8 +1,11 @@
 package com.musixmatch.lyricsartistapp.client;
 
+import com.musixmatch.lyricsartistapp.exception.MusicMatchException;
 import com.musixmatch.lyricsartistapp.model.Response;
+import com.musixmatch.lyricsartistapp.model.TrackList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 
 @Component
@@ -17,8 +21,12 @@ public class MusicMatchClient {
 
     private RestTemplate restTemplate;
 
-    private static final String MUSIX_MATCH_BASE_URL = "http://api.musixmatch.com/ws/1.1/";
-    private static final String API_KEY = "ea763ea7d9e5f955b69ed38ea84ba970";
+    @Value(value = "${music.match.url}")
+    private String musicMatchUrl;
+
+    @Value(value = "${music.match.api-key}")
+    private String apiKey;
+
     private static final Logger log = LoggerFactory.getLogger(MusicMatchClient.class);
 
     public MusicMatchClient(RestTemplate restTemplate) {
@@ -29,10 +37,10 @@ public class MusicMatchClient {
         long trackId = getTrackId(artist, track);
 
         URI lyricsUrl = UriComponentsBuilder
-                .fromHttpUrl(MUSIX_MATCH_BASE_URL)
+                .fromHttpUrl(musicMatchUrl)
                 .path("track.lyrics.get")
                 .queryParam("track_id", trackId)
-                .queryParam("apikey", API_KEY)
+                .queryParam("apikey", apiKey)
                 .build()
                 .toUri();
 
@@ -40,7 +48,14 @@ public class MusicMatchClient {
                 .header("Content-Type", "text/plain;charset=utf-8")
                 .build();
 
-        ResponseEntity<Response> lyricsResponse = restTemplate.exchange(lyricsRequest, Response.class);
+        ResponseEntity<Response> lyricsResponse = null;
+
+        try {
+            lyricsResponse = restTemplate.exchange(lyricsRequest, Response.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new MusicMatchException("Response body could not be parsed.");
+        }
 
         log.info(lyricsResponse.getBody().getMessage().getBody().getLyrics().getLyricsBody());
         return lyricsResponse;
@@ -48,11 +63,11 @@ public class MusicMatchClient {
 
     private long getTrackId(String artist, String track) {
         URI url = UriComponentsBuilder
-                .fromHttpUrl(MUSIX_MATCH_BASE_URL)
+                .fromHttpUrl(musicMatchUrl)
                 .path("track.search")
                 .queryParam("q_artist", artist)
                 .queryParam("q_track", track)
-                .queryParam("apikey", API_KEY)
+                .queryParam("apikey", apiKey)
                 .build()
                 .toUri();
 
@@ -60,9 +75,21 @@ public class MusicMatchClient {
                 .header("Content-Type", "text/plain;charset=utf-8")
                 .build();
 
-        ResponseEntity<Response> tracksResponse = restTemplate.exchange(requestEntity, Response.class);
+        ResponseEntity<Response> tracksResponse = null;
 
-        return tracksResponse.getBody().getMessage()
-                .getBody().getTrackList().get(0).getTrack().getTrackId();
+        try {
+            tracksResponse = restTemplate.exchange(requestEntity, Response.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new MusicMatchException("Response body could not be parsed.");
+        }
+
+        List<TrackList> trackList = tracksResponse.getBody().getMessage().getBody().getTrackList();
+
+        if (trackList.isEmpty()) {
+            throw new MusicMatchException("Track name was not found.");
+        }
+
+        return trackList.get(0).getTrack().getTrackId();
     }
 }
